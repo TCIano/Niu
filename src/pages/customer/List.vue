@@ -59,7 +59,7 @@ export default {
       //vue实例创建完毕
       let url = "http://localhost:6677/customer/findAll";
       request.get(url).then(response => {
-        //将查询结果设置到customers   this为当前vue实例  this只想外部函数this（created）
+        //将查询结果设置到customers   this为当前vue实例  this指向外部函数this（created）
 
         this.customers = response.data;
       });
@@ -138,7 +138,7 @@ export default {
       title: "录入顾客信息",
       visible: false,
       customers: [],
-      form: {}
+      form: {type:"category"}
     };
   },
   created() {

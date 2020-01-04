@@ -17,7 +17,7 @@
           <a href @click.prevent="toDeleteHandler(slot.row.id)">
             <i class="el-icon-delete"></i>
           </a>
-            <br>
+          <br />
           <a href @click.prevent="toUpdateHandler(slot.row)">
             <i class="el-icon-edit-outline"></i>
           </a>
@@ -62,11 +62,11 @@ export default {
   created() {
     this.loadData();
   },
+
   methods: {
     colseModul() {
       this.visible = false;
     },
-
     //重载数据
     loadData() {
       let url = "http://localhost:6677/category/findAll";
@@ -90,7 +90,7 @@ export default {
           //提示 结果
           this.$message({
             type: "success",
-            message: "删除成功!"
+            message: "删除成功"
           });
         });
       });
@@ -105,11 +105,11 @@ export default {
     //添加按钮
     toAddHandler() {
       //将form变为初始值
-      this.form = {
+      (this.form = {
         type: "category"
-      },
-        this.title = "录入员工信息";
-        this.visible = true;
+      }),
+        (this.title = "录入员工信息");
+      this.visible = true;
     },
     //添加目录里的取消按钮
     colseModul() {

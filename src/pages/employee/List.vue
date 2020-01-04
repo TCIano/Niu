@@ -116,16 +116,23 @@ export default {
     // toDeleteHandler(){
     //     this.visible = false;
     // },
-    toDeleteHandler(id) {
+    toDeleteHandler(id) {   
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-        this.$message({
+          let url = "http://localhost:6677/category/deleteById?id" + id;
+          request.get(url).then((response)=>{
+            //刷新模态框
+            this.loadData();
+            //提示结果
+            this.$message({
           type: "success",
           message: "删除成功!"
         });
+          })
+        
       });
     },
     toUpdateHandler(row) {
