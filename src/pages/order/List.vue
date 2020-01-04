@@ -4,14 +4,16 @@
     <el-button type="success" size="small" @click="toAddHandler">添加</el-button>
     <el-button type="danger" size="small">批量删除</el-button>
     <!-- 表格    冒号绑定数据    @绑定方法    访问变量+this-->
-    <el-table :data="products">
+    <el-table :data="orders.list">
       <el-table-column prop="id" label="编号"></el-table-column>
-      <el-table-column prop="name" label="产品名称"></el-table-column>
-      <el-table-column prop="price" label="单价"></el-table-column>
-      <el-table-column prop="description" label="描述"></el-table-column>
-      <el-table-column prop="categoryId" label="分类"></el-table-column>
+      <el-table-column prop="orderTime" label="下单时间"></el-table-column>
+      <el-table-column prop="total" label="总价"></el-table-column>
+      <el-table-column prop="status" label="状态"></el-table-column>
+      <el-table-column prop="customerId" label="订单ID"></el-table-column>
+      <el-table-column prop="waiterId" label="员工ID"></el-table-column>
+      <el-table-column prop="addressId" label="地址ID"></el-table-column>
       <el-table-column label="操作">
-        <template v-slot="slot">
+        <template v-slot= "slot">
           <a href @click.prevent="toDeleteHandler(slot.row.id)">删除</a>
 
           <!-- 当前行代码 -->
@@ -21,31 +23,24 @@
     </el-table>
 
     <!--分页开始  -->
-    <el-pagination layout="prev, pager, next" :total="50"></el-pagination>
+    <el-pagination layout="prev, pager, next" :total="orders.total" @current-change="pageChangesHandler"></el-pagination>
 
     <!-- 模态框-->
 
     <el-dialog :title="title" :visible.sync="visible" width="60%">
       {{form}}
-      <el-form :model= "form" label-width="88px">
-        <el-form-item label="产品名称">
-          <el-input v-model= "form.name"></el-input>
+      <el-form :model="form" label-width="88px">
+        <el-form-item label="用户名">
+          <el-input v-model="form.username"></el-input>
         </el-form-item>
-        <el-form-item label="单价">
-          <el-input v-model= "form.price"></el-input>
+        <el-form-item label="密码">
+          <el-input type="password" v-model="form.password"></el-input>
         </el-form-item>
-        <el-form-item label="所属栏目">
-          <el-select v-model= "form.catecoryId">
-            <el-option
-              v-for= "item in options"
-              :key= "item.id"
-              :label=  "item.name"
-              :value= "item.id"
-            ></el-option>
-          </el-select>
+        <el-form-item label="真实姓名">
+          <el-input type="realname" v-model="form.realname"></el-input>
         </el-form-item>
-        <el-form-item label="描述">
-          <el-input type="textarea" v-model="form.description"></el-input>
+        <el-form-item label="手机号">
+          <el-input type="telephone" v-model="form.telephone"></el-input>
         </el-form-item>
       </el-form>
 
@@ -64,30 +59,44 @@ import querystring from "querystring";
 export default {
   //用于存放网页中需要调用的方法
   methods: {
+      //分页
+      pageChangesHandler(page){
+          //将params中的当前页变为插件中的当前页
+          this.params.page = page-1;
+          //加载
+          this.loadData();
+      },
+    //   loadData1() {
+    //   //vue实例创建完毕
+    //   let url = "http://localhost:6677/order/findAll";
+    //   request.get(url).then(response => {
+    //     //将查询结果设置到products   this为当前vue实例  this指向外部函数this（created）
+
+    //     this.orders = response.data;
+    //   });
+    // },
     loadData() {
-      //vue实例创建完毕
-      let url = "http://localhost:6677/product/findAll";
-      request.get(url).then(response => {
-        //将查询结果设置到products   this为当前vue实例  this指向外部函数this（created）
-
-        this.products = response.data;
-      });
-    },
-
-    loadCategory() {
-      //vue实例创建完毕
-      let url = "http://localhost:6677/category/findAll";
-      request.get(url).then(response => {
-        //将查询结果设置到options   this为当前vue实例  this指向外部函数this（created）
-
-        this.options = response.data;
+      let url = "http://localhost:6677/order/queryPage";
+      request({
+        url,
+        method: "post",
+        //告诉后台即将查询字符串，
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        //转换为查询字符串
+        data: querystring.stringify(this.params)
+     }).then(response => {
+         //order最为一个对象里面包含了分页信息和列表信息
+        this.orders = response.data;
+       
       });
     },
     //确定按钮
     submitHandler() {
-      //this.form  对象  --- 字符串--> 后台{type :'product',age:12}
+      //this.form  对象  --- 字符串--> 后台{type :'customer',age:12}
       //通过requset与后台进行交互，且携带参数。
-      let url = "http://localhost:6677/product/saveOrUpdate";
+      let url = "http://localhost:6677/order/saveOrUpdate";
       request({
         url,
         method: "POST",
@@ -118,14 +127,14 @@ export default {
         type: "warning"
       }).then(() => {
         //调用后台接口完成删除操作
-        let url = "http://localhost:6677/product/deleteById?id=" + id;
+        let url = "http://localhost:6677/order/deleteById?id=" + id;
         request.get(url).then(response => {
           //刷新模态框
           this.loadData();
           //提示 结果
           this.$message({
             type: "success",
-            message: "删除成功!"
+            message: response.message
           });
         });
       });
@@ -134,7 +143,8 @@ export default {
     toUpdateHandler(row) {
       //显示当前行的信息
       this.form = row;
-      (this.title = "修改产品信息"), (this.visible = true);
+      this.title = "修改订单信息", 
+      this.visible = true;
     },
     // 弹框取消
     colseModul() {
@@ -143,25 +153,28 @@ export default {
     // 添加按钮i
     toAddHandler() {
       //将form变为初始值
-      this.form = {},
-       this.title = "录入产品信息", 
-       this.visible = true;
+      this.form = {type:"order"},
+        this.title = "录入订单信息",
+        this.visible = true;
     }
   },
   //用于存放向网页中显示的数据
   data() {
     return {
-      title: "录入产品信息",
+      title: "录入订单信息",
       visible: false,
-      options: [],
-      products: [],
-      form: {}
+      
+      orders:{},
+      form: {type:"order"},
+      params:{
+          page:0,
+          pageSize:10,
+      }
     };
   },
   created() {
     this.loadData();
-    //加载栏目信息
-    this.loadCategory();
+    // this.loadData1();
   }
 };
 </script>

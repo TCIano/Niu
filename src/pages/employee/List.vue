@@ -122,7 +122,7 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-          let url = "http://localhost:6677/category/deleteById?id" + id;
+          let url = "http://localhost:6677/waiter/deleteById?id" + id;
           request.get(url).then((response)=>{
             //刷新模态框
             this.loadData();
